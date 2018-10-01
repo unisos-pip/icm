@@ -134,32 +134,6 @@ _EOF_
 }
 
 
-function vis_cvsToGitInit {
-    G_funcEntry
-    function describeF {  cat  << _EOF_
-_EOF_
-    }
-    EH_assert [[ $# -eq 0 ]]
-
-    inBaseDirDo ./dev pypiProc.sh -v -n showRun -i distClean
-
-    lpDo lcaCvsAdmin.sh -h -v -n showRun -i cvsedRecurseDeCvsThere .
-
-    grep -v 'Related BxPanels   ::' Panel.org  > Panel.new
-
-    lpDo mv Panel.new Panel.org
-
-    lpDo rm -r -f fptb
-
-    lpDo cp /libre/ByStar/InitialTemplates/begin/templates/moded/git/gitignore/emacs+py .gitignore
-
-    lpDo cp /libre/ByStar/InitialTemplates/begin/templates/moded/git/gitattributes/py .gitattributes    
-    
-    
-    lpReturn
-}
-
-
 
 
 ####+BEGIN: bx:dblock:bash:end-of-file :types ""
