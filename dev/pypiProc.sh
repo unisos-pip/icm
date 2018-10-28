@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ####+BEGIN: bx:dblock:bash:top-of-file :vc "cvs" partof: "bystar" :copyleft "halaal+minimal"
-typeset RcsId="$Id: pypiProc.sh,v 1.7 2018-01-01 20:46:08 lsipusr Exp $"
+typeset RcsId="$Id: pypiProc.sh,v 1.8 2018-10-17 23:43:52 lsipusr Exp $"
 # *CopyLeft*
 #  This is a Halaal Poly-Existential. See http://www.freeprotocols.org
 
@@ -584,6 +584,10 @@ _EOF_
     EH_assert [[ $# -eq 0 ]]
 
     opDo icmPreps
+
+    if [ ! -f /de/bx/nne/dev-py/pypi/pkgs/fptb/pypiProfile/default/userName ] ; then
+	opDo ln -s /de/bx/nne/dev-py/pypi/pkgs/fptb/pypiProfile/bx4pypi /de/bx/nne/dev-py/pypi/pkgs/fptb/pypiProfile/default
+    fi
 
     local repoStr="--repository-url https://upload.pypi.org/legacy/"
     local userName=$(fileParamManage.py  -i fileParamReadPath /de/bx/nne/dev-py/pypi/pkgs/fptb/pypiProfile/default/userName)
