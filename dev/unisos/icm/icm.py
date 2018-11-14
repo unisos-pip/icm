@@ -1017,22 +1017,20 @@ def subjectToTracking(fnLoc=True, fnEntry=True, fnExit=True):
             logControler = LOG_Control()
             logger = logControler.loggerGet()
 
-            if fnLoc:
-                depth = ucf.stackFrameDepth(2)
-                indentation = ucf.STR_indentMultiples(multiple=depth)
-
-                logger.debug(format('%s Monitoring(M-Call-%s): ' % (indentation, depth)) + ucf.stackFrameInfoGet(2))
+            depth = ucf.stackFrameDepth(2)
+            indentation = ucf.STR_indentMultiples(multiple=depth)
+            
+            # if fnLoc:
+            #     logger.debug(format('%s Monitoring(M-Call-%s): ' % (indentation, depth)) + ucf.stackFrameInfoGet(2))
 
             if fnEntry:
-                logger.debug( "%s M-Enter-%s: %s(%s)" % (indentation, depth, fn.__name__, ", ".join(args)) )
-
+                logger.debug( "%s M-Enter-%s: %s(%s) AT %s" % (indentation, depth, fn.__name__, ", ".join(args), ucf.stackFrameInfoGet(2)))
 
             retVal = fn(*v, **k)
 
             if fnExit:
-                logger.debug( "%s M-Return-%s(%s):  %s" % (indentation, depth, fn.__name__, retVal) )
-
-
+                logger.debug( "%s M-Return-%s(%s):  %s AT %s" % (indentation, depth, fn.__name__, retVal, ucf.stackFrameInfoGet(2)))
+            
             return retVal
         return wrapped
     return subSubjectToTracking
