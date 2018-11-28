@@ -3823,8 +3823,9 @@ def G_argsProc(arguments, extraArgs):
 
      argsCommonProc(parser)
      #commonIcmParamsPrep()
-     
-     extraArgs(parser)
+
+     if extraArgs:
+        extraArgs(parser)
 
      #
      # The logic below breaks multiple --invokes.
