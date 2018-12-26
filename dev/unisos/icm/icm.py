@@ -1779,6 +1779,7 @@ def EH_badOutcome(outcome):
                status=outcome.error,
                errInfo=outcome.errInfo,
         ))
+    print('EH_: ' + ' -- ' + ucf.stackFrameInfoGet(2) ) 
 
     return outcome
 
