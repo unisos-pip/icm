@@ -4329,6 +4329,27 @@ def icmRunArgs_isRunModeDryRun():
     return retVal
 
 """
+*  [[elisp:(org-cycle)][| ]]  [[elisp:(blee:ppmm:org-mode-toggle)][Nat]] [[elisp:(beginning-of-buffer)][Top]] [[elisp:(delete-other-windows)][(1)]] || Func             ::  icmRunArgs_isRunModeDryRun    [[elisp:(org-cycle)][| ]]
+"""
+
+def icmRunArgs_verbosityLevel():
+    """
+    """
+    G = IcmGlobalContext()
+    icmRunArgs = G.icmRunArgsGet()
+
+    level = icmRunArgs.verbosityLevel
+    if level is None:
+        return 30
+
+    try: level = int(level)
+    except: pass
+
+    return level
+
+
+
+"""
 *  [[elisp:(org-cycle)][| ]]  [[elisp:(blee:ppmm:org-mode-toggle)][Nat]] [[elisp:(beginning-of-buffer)][Top]] [[elisp:(delete-other-windows)][(1)]] || Func             ::  icmRunArgs_isDocStringRequested    [[elisp:(org-cycle)][| ]]
 """
 
