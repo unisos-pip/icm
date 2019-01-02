@@ -547,6 +547,7 @@ import subprocess
 #from unisos.ucf import ucf
 from unisos import ucf
 
+import getpass
 
 
 
@@ -1286,9 +1287,22 @@ def subProc_cmnd(
 #LOGGER = 'Icm.Python.Logger'
 LOGGER = 'Icm'
 CONSL_LEVEL_RANGE = range(0, 51)
-LOG_FILE = '/tmp/NOTYET.log'
 #FORMAT_STR = '%(asctime)s %(levelname)s %(message)s'
 FORMAT_STR = '%(levelname)s %(message)s -- %(asctime)s'
+
+
+####+BEGIN: bx:icm:python:func :funcName "logFileName" :funcType "anyOrNone" :retType "str" :deco "" :argsList ""
+"""
+*  [[elisp:(org-cycle)][| ]] [[elisp:(org-show-subtree)][|=]] [[elisp:(show-children 10)][|V]] [[elisp:(bx:orgm:indirectBufOther)][|>]] [[elisp:(bx:orgm:indirectBufMain)][|I]] [[elisp:(blee:ppmm:org-mode-toggle)][|N]] [[elisp:(org-top-overview)][|O]] [[elisp:(progn (org-shifttab) (org-content))][|C]] [[elisp:(delete-other-windows)][|1]]  Func-anyOrNone :: /logFileName/ retType=str argsList=nil  [[elisp:(org-cycle)][| ]]
+"""
+def logFileName():
+####+END:
+    return (
+        "/tmp/{userName}-ICM.log".format(
+            userName=getpass.getuser()
+        )
+    )
+    
 
 """
 *  [[elisp:(org-cycle)][| ]]  [[elisp:(blee:ppmm:org-mode-toggle)][Nat]] [[elisp:(beginning-of-buffer)][Top]] [[elisp:(delete-other-windows)][(1)]] || Func             ::  getConsoleLevel    [[elisp:(org-cycle)][| ]]
@@ -1336,7 +1350,7 @@ class LOG_Control():
         logger.setLevel(logging.DEBUG)
         formatter = logging.Formatter(FORMAT_STR)
         ## Add FileHandler
-        fh = logging.FileHandler(LOG_FILE)
+        fh = logging.FileHandler(logFileName())
         fh.name = 'File Logger'
         fh.level = logging.WARNING
         fh.formatter = formatter
@@ -1376,7 +1390,7 @@ class LOG_Control():
         logger.setLevel(logging.DEBUG)
         formatter = logging.Formatter(FORMAT_STR)
         ## Add FileHandler
-        fh = logging.FileHandler(LOG_FILE)
+        fh = logging.FileHandler(logFileName())
         fh.name = 'File Logger'
         fh.level = logging.WARNING
         fh.formatter = formatter
