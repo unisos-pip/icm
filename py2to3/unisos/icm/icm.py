@@ -1298,7 +1298,8 @@ def subProc_cmnd(
 #LOGGER = 'Icm.Python.Logger'
 LOGGER = 'Icm'
 CONSL_LEVEL_RANGE = list(range(0, 51))
-LOG_FILE = '/tmp/NOTYET.log'
+# LOG_FILE = '/tmp/NOTYET.log'
+LOG_FILE = '/dev/null'   # NOTYET, MB-20200623 to get things working -- Need to be revisited.
 #FORMAT_STR = '%(asctime)s %(levelname)s %(message)s'
 FORMAT_STR = '%(levelname)s %(message)s -- %(asctime)s'
 
