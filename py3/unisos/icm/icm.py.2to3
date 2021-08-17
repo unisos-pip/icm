@@ -1,0 +1,801 @@
+RefactoringTool: Skipping optional fixer: buffer
+RefactoringTool: Skipping optional fixer: idioms
+RefactoringTool: Skipping optional fixer: set_literal
+RefactoringTool: Skipping optional fixer: ws_comma
+RefactoringTool: Refactored ./icm/py3/unisos/icm/icm.py
+--- ./icm/py3/unisos/icm/icm.py	(original)
++++ ./icm/py3/unisos/icm/icm.py	(refactored)
+@@ -199,7 +199,7 @@
+         cmndParamsMandatory = self.__class__.cmndParamsMandatory
+ 
+         for each in cmndParamsMandatory:
+-            if each in icmRunArgsDict.keys():
++            if each in list(icmRunArgsDict.keys()):
+                 continue
+             else:
+                 return "Unexpected Mandatory Param: param={param} --".format(param=each)
+@@ -230,7 +230,7 @@
+         cmndParamsOptional = self.__class__.cmndParamsOptional
+ 
+         for each in cmndParamsOptional:
+-            if each in icmRunArgsDict.keys():
++            if each in list(icmRunArgsDict.keys()):
+                 continue
+             else:
+                 return "Unexpected Optional Param: param={param} --".format(param=each)
+@@ -250,7 +250,7 @@
+         return self.cmndMyName()
+             
+     def cmnd(self, interactive=False):
+-        print "This is default Cmnd Class Definition -- It is expected to be overwritten. You should never see this."
++        print("This is default Cmnd Class Definition -- It is expected to be overwritten. You should never see this.")
+ 
+     def cmndArgsSpec(self):
+         # This is default Cmnd Class Definition -- It is expected to be overwritten. You should never see this."
+@@ -331,13 +331,13 @@
+             cmndLineArgValue,
+             argChoices,
+         ):
+-            print "cmndLineArgValue={cmndLineArgValue} is not in {argChoices}".format(
++            print("cmndLineArgValue={cmndLineArgValue} is not in {argChoices}".format(
+                 cmndLineArgValue=cmndLineArgValue, argChoices=argChoices,
+-            )
++            ))
+             return False
+ 
+         cmndArgsSpecDictDict = cmndArgsSpecDict.argDictGet()
+-        for argPosition, cmndArgSpec in cmndArgsSpecDictDict.iteritems():
++        for argPosition, cmndArgSpec in cmndArgsSpecDictDict.items():
+             argChoices = cmndArgSpec.argChoicesGet()
+ 
+             if not argChoices:
+@@ -417,7 +417,7 @@
+         max=int(rangeList[1])
+         return min, max
+     else:
+-        print 'rangeListLen not 1 or 2'
++        print('rangeListLen not 1 or 2')
+         return errVal()
+         
+ ####+BEGINNOT: bx:icm:python:cmnd:classHead :modPrefix "lib" :cmndName "model" :comment "" :parsMand "" :parsOpt "" :argsMin "0" :argsMax "0" :asFunc "" :interactiveP ""
+@@ -449,7 +449,7 @@
+         description = """
+ ** Python-ICM Overview: file:/libre/ByStar/InitialTemplates/activeDocs/bxRefModel/iim/fullUsagePanel-en.org
+         """
+-        if interactive: print description
++        if interactive: print(description)
+         return description
+ 
+     def cmndDocStr(self): return """
+@@ -517,7 +517,7 @@
+ ** Extract (display) an CMND's docstring
+ *** --docstring -i cmnd
+         """
+-        if interactive: print description
++        if interactive: print(description)
+         return description
+ 
+ ####+BEGIN: bx:icm:python:icmItem :itemType "=Imports=" :itemTitle "*IMPORTS*"
+@@ -608,7 +608,7 @@
+         cmndArgsValid = cmndArgsSpec["0&-1"]
+         for each in effectiveArgsList:
+             if each in cmndArgsValid:
+-                print each
++                print(each)
+                 if interactive:
+                     #print( str( __doc__ ) )  # This is the Summary: from the top doc-string
+                     #version(interactive=True)
+@@ -657,7 +657,7 @@
+     """
+ ** TODO Place Holder -- Converted to a method, This Function will be obsolted. Should validate argsList to confirm that it is consistent with cmndArgsSpec
+ """
+-    print "cmndArgsValidate Function OBSOLTED -- Deprecated"
++    print("cmndArgsValidate Function OBSOLTED -- Deprecated")
+     return True
+ 
+ 
+@@ -989,11 +989,11 @@
+ 
+         import functools
+         # Unpack function's arg count, arg names, arg defaults
+-        code = fn.func_code
++        code = fn.__code__
+         argcount = code.co_argcount
+         argnames = code.co_varnames[:argcount]
+-        fn_defaults = fn.func_defaults or list()
+-        argdefs = dict(zip(argnames[-len(fn_defaults):], fn_defaults))
++        fn_defaults = fn.__defaults__ or list()
++        argdefs = dict(list(zip(argnames[-len(fn_defaults):], fn_defaults)))
+ 
+         @functools.wraps(fn)
+         def wrapped(*v, **k):
+@@ -1008,11 +1008,11 @@
+ 
+             # Collect function arguments by chaining together positional,
+             # defaulted, extra positional and keyword arguments.
+-            positional = map(ucf.format_arg_value, zip(argnames, v))
++            positional = list(map(ucf.format_arg_value, list(zip(argnames, v))))
+             defaulted = [ucf.format_arg_value((a, argdefs[a]))
+                          for a in argnames[len(v):] if a not in k]
+-            nameless = map(repr, v[argcount:])
+-            keyword = map(ucf.format_arg_value, k.items())
++            nameless = list(map(repr, v[argcount:]))
++            keyword = list(map(ucf.format_arg_value, list(k.items())))
+             args = positional + defaulted + nameless + keyword
+ 
+             logControler = LOG_Control()
+@@ -1058,9 +1058,9 @@
+          The cmnd type mimics Emacs' (interactive)
+     """
+     if icmRunArgs_isDocStringRequested():
+-        print( ucf.stackFrameInfoGet(2) )
++        print(( ucf.stackFrameInfoGet(2) ))
+         #print( stackFrameArgsGet(2) )
+-        print( ucf.stackFrameDocString(2) )
++        print(( ucf.stackFrameDocString(2) ))
+ 
+         raise StopIteration()
+ 
+@@ -1069,7 +1069,7 @@
+         pass
+     elif type == 'describe':
+         #print( stackFrameArgsGet(2) )
+-        print( ucf.stackFrameDocString(2) )
++        print(( ucf.stackFrameDocString(2) ))
+     elif type == 'icmUiSupport':
+         pass
+     elif type == 'generic':
+@@ -1094,7 +1094,7 @@
+     globdict= globals()
+ 
+     TM_here('ICM-Loading: ' + file)
+-    execfile(file, globdict)
++    exec(compile(open(file, "rb").read(), file, 'exec'), globdict)
+ 
+ 
+ """
+@@ -1125,19 +1125,19 @@
+     #
+ 
+     # Unpack function's arg count, arg names, arg defaults
+-    code = fn.func_code
++    code = fn.__code__
+     argcount = code.co_argcount
+     argnames = code.co_varnames[:argcount]
+-    fn_defaults = fn.func_defaults or list()
+-    argdefs = dict(zip(argnames[-len(fn_defaults):], fn_defaults))
++    fn_defaults = fn.__defaults__ or list()
++    argdefs = dict(list(zip(argnames[-len(fn_defaults):], fn_defaults)))
+ 
+     # Collect function arguments by chaining together positional,
+     # defaulted, extra positional and keyword arguments.
+-    positional = map(ucf.format_arg_value, zip(argnames, v))
++    positional = list(map(ucf.format_arg_value, list(zip(argnames, v))))
+     defaulted = [ucf.format_arg_value((a, argdefs[a]))
+                  for a in argnames[len(v):] if a not in k]
+-    nameless = map(repr, v[argcount:])
+-    keyword = map(ucf.format_arg_value, k.items())
++    nameless = list(map(repr, v[argcount:]))
++    keyword = list(map(ucf.format_arg_value, list(k.items())))
+     args = positional + defaulted + nameless + keyword
+ 
+     logControler = LOG_Control()
+@@ -1161,19 +1161,19 @@
+     """
+ 
+     # Unpack function's arg count, arg names, arg defaults
+-    code = fn.func_code
++    code = fn.__code__
+     argcount = code.co_argcount
+     argnames = code.co_varnames[:argcount]
+-    fn_defaults = fn.func_defaults or list()
+-    argdefs = dict(zip(argnames[-len(fn_defaults):], fn_defaults))
++    fn_defaults = fn.__defaults__ or list()
++    argdefs = dict(list(zip(argnames[-len(fn_defaults):], fn_defaults)))
+ 
+     # Collect function arguments by chaining together positional,
+     # defaulted, extra positional and keyword arguments.
+-    positional = map(ucf.format_arg_value, zip(argnames, v))
++    positional = list(map(ucf.format_arg_value, list(zip(argnames, v))))
+     defaulted = [ucf.format_arg_value((a, argdefs[a]))
+                  for a in argnames[len(v):] if a not in k]
+-    nameless = map(repr, v[argcount:])
+-    keyword = map(ucf.format_arg_value, k.items())
++    nameless = list(map(repr, v[argcount:]))
++    keyword = list(map(ucf.format_arg_value, list(k.items())))
+     args = positional + defaulted + nameless + keyword
+ 
+     logControler = LOG_Control()
+@@ -1286,7 +1286,7 @@
+ 
+ #LOGGER = 'Icm.Python.Logger'
+ LOGGER = 'Icm'
+-CONSL_LEVEL_RANGE = range(0, 51)
++CONSL_LEVEL_RANGE = list(range(0, 51))
+ #FORMAT_STR = '%(asctime)s %(levelname)s %(message)s'
+ FORMAT_STR = '%(levelname)s %(message)s -- %(asctime)s'
+ 
+@@ -1315,7 +1315,7 @@
+     except: pass
+     if level not in CONSL_LEVEL_RANGE:
+         args.verbosityLevel = None
+-        print 'warning: console log level ', level, ' not in range 1..50.'
++        print('warning: console log level ', level, ' not in range 1..50.')
+         return
+     return level
+ 
+@@ -1740,7 +1740,7 @@
+     else:
+         outString = format(*v, **k)
+ 
+-    print('EH_: ' + outString + ' -- ' + ucf.stackFrameInfoGet(2) )
++    print(('EH_: ' + outString + ' -- ' + ucf.stackFrameInfoGet(2) ))
+     logger.critical('EH_: ' + outString + ' -- ' + ucf.stackFrameInfoGet(2) )
+ 
+     #raise RuntimeError()
+@@ -1786,14 +1786,14 @@
+ *  [[elisp:(org-cycle)][| ]]  [[elisp:(blee:ppmm:org-mode-toggle)][Nat]] [[elisp:(beginning-of-buffer)][Top]] [[elisp:(delete-other-windows)][(1)]] || Func             ::  EH_badOutcome    [[elisp:(org-cycle)][| ]]
+ """
+ def EH_badOutcome(outcome):
+-    print(
++    print((
+         "EH_badOutcome: InvokedBy {invokerName}, Operation Failed: Stdcmnd={stdcmnd} Error={status} -- {errInfo}".
+         format(invokerName=outcome.invokerName,
+                stdcmnd=outcome.stdcmnd,
+                status=outcome.error,
+                errInfo=outcome.errInfo,
+-        ))
+-    print('EH_: ' + ' -- ' + ucf.stackFrameInfoGet(2) ) 
++        )))
++    print(('EH_: ' + ' -- ' + ucf.stackFrameInfoGet(2) )) 
+ 
+     return outcome
+ 
+@@ -1869,7 +1869,7 @@
+     else:
+         outString = format(*v, **k)
+ 
+-    print( 'ANN_: ' + outString )
++    print(( 'ANN_: ' + outString ))
+ 
+ """
+ *  [[elisp:(org-cycle)][| ]]  [[elisp:(blee:ppmm:org-mode-toggle)][Nat]] [[elisp:(beginning-of-buffer)][Top]] [[elisp:(delete-other-windows)][(1)]] || Func             ::  ANN_here -- Prepends ANN_ and adds stackFrameInfoGet(2)   [[elisp:(org-cycle)][| ]]
+@@ -1886,7 +1886,7 @@
+     else:
+         outString = format(*v, **k)
+ 
+-    print('ANN_: ' + outString + ' -- ' + ucf.stackFrameInfoGet(2) )
++    print(('ANN_: ' + outString + ' -- ' + ucf.stackFrameInfoGet(2) ))
+ 
+ 
+ """
+@@ -1941,7 +1941,7 @@
+     else:
+         outString = format(*v, **k)
+ 
+-    print('OUT_: ' + outString + ' -- ' + ucf.stackFrameInfoGet(2) )
++    print(('OUT_: ' + outString + ' -- ' + ucf.stackFrameInfoGet(2) ))
+ 
+     
+ 
+@@ -2004,7 +2004,7 @@
+     """
+     """
+     if not os.path.isdir(baseDir):
+-        try: os.makedirs(baseDir, 0775)
++        try: os.makedirs(baseDir, 0o775)
+         except OSError: pass
+ 
+     return(
+@@ -2108,7 +2108,7 @@
+         absFileSysPath = os.path.abspath(self.__fileSysPath)
+ 
+         if not os.path.isdir(absFileSysPath):
+-            try: os.makedirs( absFileSysPath, 0777 )
++            try: os.makedirs( absFileSysPath, 0o777 )
+             except OSError: pass
+ 
+         thisFilePath= format(absFileSysPath + '/_tree_')
+@@ -2121,7 +2121,7 @@
+         absFileSysPath = os.path.abspath(self.__fileSysPath)
+ 
+         if not os.path.isdir(absFileSysPath):
+-            try: os.makedirs( absFileSysPath, 0777 )
++            try: os.makedirs( absFileSysPath, 0o777 )
+             except OSError: pass
+ 
+         thisFilePath= format(absFileSysPath + '/_tree_')
+@@ -2151,17 +2151,17 @@
+     def nodePredicate(self, objectTypes=None, treeProc=None, ignore=None):
+         """At the fileSysPath of the FILE_TreeObject, create a leaf.
+         """
+-        print(self.__fileSysPath)
++        print((self.__fileSysPath))
+ 
+     def leafPredicate(self, objectTypes=None, treeProc=None, ignore=None):
+         """At the fileSysPath of the FILE_TreeObject, create a leaf.
+         """
+-        print(self.__fileSysPath)
++        print((self.__fileSysPath))
+ 
+     def nodeUpdate(self, objectTypes=None, treeProc=None, ignore=None):
+         """At the fileSysPath of the FILE_TreeObject, create a leaf.
+         """
+-        print(self.__fileSysPath)
++        print((self.__fileSysPath))
+ 
+ 
+     def leafUpdate(self, objectTypes=None, treeProc=None, ignore=None):
+@@ -2382,7 +2382,7 @@
+             parValue = self.__parValue
+ 
+         parNameFullPath = os.path.join(self.__storeBase, parName)
+-        try: os.makedirs( parNameFullPath, 0777 )
++        try: os.makedirs( parNameFullPath, 0o777 )
+         except OSError: pass
+ 
+         fileTreeObject = FILE_TreeObject(parNameFullPath)
+@@ -2436,7 +2436,7 @@
+         #     parValue = self.__parValue
+ 
+         parNameFullPath = os.path.join(self.__storeBase, parName)
+-        try: os.makedirs( parNameFullPath, 0777 )
++        try: os.makedirs( parNameFullPath, 0o777 )
+         except OSError: pass
+ 
+         fileTreeObject = FILE_TreeObject(parNameFullPath)
+@@ -2553,7 +2553,7 @@
+     filePar = blank.readFrom(storeBase=parRoot, parName=parName)
+ 
+     if filePar == None:
+-        print('Missing: ' + parRoot + parName)
++        print(('Missing: ' + parRoot + parName))
+         #raise IOError        
+         #return EH_critical_usageError('blank')
+         return None        
+@@ -2598,7 +2598,7 @@
+     filePar = blank.readFromPath(parRoot)
+ 
+     if filePar == None:
+-        print('Missing: ' + parRoot)
++        print(('Missing: ' + parRoot))
+         return EH_critical_usageError('blank')
+ 
+     return(filePar.parValueGet())
+@@ -2617,7 +2617,7 @@
+     """
+ 
+     parFullPath = os.path.join(parRoot, parName)
+-    try: os.makedirs( parFullPath, 0777 )
++    try: os.makedirs( parFullPath, 0o777 )
+     except OSError: pass
+ 
+     thisFileParam = FILE_Param(parName=parVerTag,
+@@ -2645,7 +2645,7 @@
+         except RuntimeError:  return
+ 
+     parFullPath = os.path.join(parRoot, parName)
+-    try: os.makedirs( parFullPath, 0777 )
++    try: os.makedirs( parFullPath, 0o777 )
+     except OSError: pass
+ 
+ 
+@@ -2748,18 +2748,18 @@
+         if thisParamDict == None:
+             continue
+ 
+-        for parName, filePar  in thisParamDict.iteritems():
+-            print('parName=' + parName)
++        for parName, filePar  in thisParamDict.items():
++            print(('parName=' + parName))
+             if filePar == None:
+                 continue
+             thisValue=filePar.parValueGetLines()
+             if thisValue == None:
+                 TM_here("Skipping: " + filePar.parNameGet())
+                 continue
+-            print(
++            print((
+                 filePar.parNameGet() +
+                 '=' +
+-                thisValue[0])
++                thisValue[0]))
+     return
+ 
+ subjectToTracking(fnLoc=True, fnEntry=True, fnExit=True)
+@@ -2884,7 +2884,7 @@
+ 
+ def FILE_paramDictPrint(fileParamDict):
+     """ Returns a Dictionary of paramName:FILE_Param.        """
+-    for parName, filePar  in fileParamDict.iteritems():
++    for parName, filePar  in fileParamDict.items():
+         #print('parName=' + parName)
+         if filePar == None:
+             continue
+@@ -2893,14 +2893,14 @@
+             TM_here("Skipping: " + filePar.parNameGet())
+             continue
+         if thisValue:
+-            print(
++            print((
+                 filePar.parNameGet() +
+                 '=' +
+-                thisValue[0])
++                thisValue[0]))
+         else: # Empty list
+-            print(
++            print((
+                 filePar.parNameGet() +
+-                '=')
++                '='))
+ 
+ 
+ 
+@@ -2949,7 +2949,7 @@
+                     EH_problem_info("Missing " + root)
+                     continue
+ 
+-                print(root + "=" + fileParam.parValueGet())
++                print((root + "=" + fileParam.parValueGet()))
+ 
+     return
+ 
+@@ -2974,9 +2974,9 @@
+ 
+     for root, dirs, files in os.walk(absolutePath):
+         # Each time that we see a dir we will create a new subDict
+-        print root
+-        print dirs
+-        print files
++        print(root)
++        print(dirs)
++        print(files)
+ 
+     return fileParamsDict
+ 
+@@ -3171,7 +3171,7 @@
+          absoluteParRoot = os.path.abspath(parRoot)
+ 
+          if not os.path.isdir(absoluteParRoot):
+-            try: os.makedirs( absoluteParRoot, 0775 )
++            try: os.makedirs( absoluteParRoot, 0o775 )
+             except OSError: pass
+  
+          #print absoluteParRoot
+@@ -3875,7 +3875,7 @@
+      """
+ 
+ 
+-     for key, icmParam in icmParams.parDictGet().iteritems():
++     for key, icmParam in icmParams.parDictGet().items():
+          if ( icmParam.argsparseShortOptGet() == None )  and ( icmParam.argsparseLongOptGet() == None ):
+              break
+ 
+@@ -3917,7 +3917,7 @@
+ 
+      LOG_here("Updating icmParams at: {parRoot}".format(parRoot=parRoot))
+      
+-     for key, icmParam in icmParams.parDictGet().iteritems():
++     for key, icmParam in icmParams.parDictGet().items():
+          if ( icmParam.argsparseShortOptGet() == None )  and ( icmParam.argsparseLongOptGet() == None ):
+              break
+          
+@@ -3932,7 +3932,7 @@
+ """
+ 
+ def cmndParamsMandatoryAssert(paramsList):
+-        for key, value in paramsList.iteritems():
++        for key, value in paramsList.items():
+             if value == None: return(EH_critical_usageError(key))
+             
+ 
+@@ -3957,19 +3957,19 @@
+ 
+         cmndExampleMenuChapter('/Intercatively Invokable Module (ICM) General Usage Model/')
+ 
+-        print( G_myName + " --help" )
+-        print( G_myName + " -i model" )
+-        print( G_myName + " -i icmHelp" )
+-        print( G_myName + " -i icmOptionsExamples" )
+-        print( G_myName + " -i icmInfo" )
+-        print( G_myName + " -i icmInUpdate ./var" )        
+-        print( G_myName + " -i cmndInfo cmndName" )
+-        print( G_myName + " -i cmndInfo cmndInfo" )                
+-        print( G_myName + " -i devExamples" )
+-        print( G_myName + " -i describe" )
+-        print( G_myName + " -i describe" + " |" + " emlVisit")
+-        print( G_myName + " -i examples" )
+-        print( G_myName + " -i examples" + " |" + " icmToEmlVisit")
++        print(( G_myName + " --help" ))
++        print(( G_myName + " -i model" ))
++        print(( G_myName + " -i icmHelp" ))
++        print(( G_myName + " -i icmOptionsExamples" ))
++        print(( G_myName + " -i icmInfo" ))
++        print(( G_myName + " -i icmInUpdate ./var" ))        
++        print(( G_myName + " -i cmndInfo cmndName" ))
++        print(( G_myName + " -i cmndInfo cmndInfo" ))                
++        print(( G_myName + " -i devExamples" ))
++        print(( G_myName + " -i describe" ))
++        print(( G_myName + " -i describe" + " |" + " emlVisit"))
++        print(( G_myName + " -i examples" ))
++        print(( G_myName + " -i examples" + " |" + " icmToEmlVisit"))
+ 
+ """
+ *  [[elisp:(org-cycle)][| ]]  [[elisp:(blee:ppmm:org-mode-toggle)][Nat]] [[elisp:(beginning-of-buffer)][Top]] [[elisp:(delete-other-windows)][(1)]] || Func             ::  G_commonBriefExamples    [[elisp:(org-cycle)][| ]]
+@@ -3982,11 +3982,11 @@
+ 
+      cmndExampleMenuChapter('/Intercatively Invokable Module (ICM) Brief Usage Model/')
+ 
+-     print( G_myName + " -i commonExamples" + "    # Help, Model, icmOptionsExample")
+-     print( G_myName + " -i describe" + " |" + " emlVisit")
+-     print( G_myName + " -i examples" + " |" + " icmToEmlVisit")
+-     print( G_myName + " -i visit")     
+-     print( """emlVisit -v -n showRun -i gotoPanel """ + G_myFullName)
++     print(( G_myName + " -i commonExamples" + "    # Help, Model, icmOptionsExample"))
++     print(( G_myName + " -i describe" + " |" + " emlVisit"))
++     print(( G_myName + " -i examples" + " |" + " icmToEmlVisit"))
++     print(( G_myName + " -i visit"))     
++     print(( """emlVisit -v -n showRun -i gotoPanel """ + G_myFullName))
+ 
+      cmndExampleMenuChapter('*ICM Blee Player Invokations*')
+      ANN_write("icmPlayer.sh -h -v -n showRun -i grouped {G_myName}".format(G_myName=G_myName))     
+@@ -4001,9 +4001,9 @@
+ 
+      print("======== Development =========")
+ 
+-     print("python -m trace -l " + G_myName + " | egrep -v " + '\'/python2.7/|\<string\>\'')
+-     print("python -m trace -l " + G_myName)
+-     print("python -m trace -t " + G_myName)
++     print(("python -m trace -l " + G_myName + " | egrep -v " + '\'/python2.7/|\<string\>\''))
++     print(("python -m trace -l " + G_myName))
++     print(("python -m trace -t " + G_myName))
+ 
+ 
+ """
+@@ -4023,14 +4023,14 @@
+ 
+         print("==== cmndEx Built-In Feature Examples =====")
+ 
+-        print( G_myName + " -i icm.cmndExample arg1 arg2" )
+-        print( G_myName + " -v 20" + " -i icm.cmndExample arg1 arg2" )
+-        print( G_myName + " -v 1" + " -i icm.cmndExample arg1 arg2" )
+-        print( G_myName + " --runMode dryRun" + " -i icm.cmndExample arg1 arg2" )
+-        print( G_myName + " -v 1" + " --callTrackings monitor-" + " -i icm.cmndExample arg1 arg2" )
+-        print( G_myName + " -v 1" + " --callTrackings monitor+" + " --callTrackings invoke+" + " -i icm.cmndExample arg1 arg2" )
+-        print( G_myName + " -v 1" + " --callTrackings monitor-" + " --callTrackings invoke-" + " -i icm.cmndExample arg1 arg2" )
+-        print( G_myName + " --docstring" + " -i describe" )
++        print(( G_myName + " -i icm.cmndExample arg1 arg2" ))
++        print(( G_myName + " -v 20" + " -i icm.cmndExample arg1 arg2" ))
++        print(( G_myName + " -v 1" + " -i icm.cmndExample arg1 arg2" ))
++        print(( G_myName + " --runMode dryRun" + " -i icm.cmndExample arg1 arg2" ))
++        print(( G_myName + " -v 1" + " --callTrackings monitor-" + " -i icm.cmndExample arg1 arg2" ))
++        print(( G_myName + " -v 1" + " --callTrackings monitor+" + " --callTrackings invoke+" + " -i icm.cmndExample arg1 arg2" ))
++        print(( G_myName + " -v 1" + " --callTrackings monitor-" + " --callTrackings invoke-" + " -i icm.cmndExample arg1 arg2" ))
++        print(( G_myName + " --docstring" + " -i describe" ))
+ 
+ 
+ 
+@@ -4041,8 +4041,8 @@
+ def icmExampleMyName(myName, myFullName):
+     """
+     """
+-    print("#######  " + '  *' + myName + '*  ' + "  ##########")
+-    print("=======  " + myFullName + "  ===========")
++    print(("#######  " + '  *' + myName + '*  ' + "  ##########"))
++    print(("=======  " + myFullName + "  ==========="))
+ 
+ """
+ *  [[elisp:(org-cycle)][| ]]  [[elisp:(blee:ppmm:org-mode-toggle)][Nat]] [[elisp:(beginning-of-buffer)][Top]] [[elisp:(delete-other-windows)][(1)]] || CMND       ::  ex_gCommon    [[elisp:(org-cycle)][| ]]
+@@ -4068,7 +4068,7 @@
+ def cmndExampleMenuChapter(title):
+     """
+     """
+-    print("#######  " + title + "  ##########")
++    print(("#######  " + title + "  ##########"))
+ 
+ 
+ """
+@@ -4078,7 +4078,7 @@
+ def cmndExampleMenuSection(title):
+      """
+      """
+-     print("=======  " + title + "  ==========")
++     print(("=======  " + title + "  =========="))
+ 
+ 
+ """
+@@ -4087,7 +4087,7 @@
+ @subjectToTracking(fnLoc=True, fnEntry=True, fnExit=True)
+ def cmndExampleMenuSubSection(title):
+      """  """
+-     print("%%%%%%%  " + title + "  %%%%%%%%%%%")
++     print(("%%%%%%%  " + title + "  %%%%%%%%%%%"))
+ 
+ 
+ """
+@@ -4119,15 +4119,15 @@
+ 
+     if verbosity == 'none':
+         #print( G_myName + " -v 30" + " " + fullCommandLine)
+-        print( G_myName + " " + fullCommandLine)        
++        print(( G_myName + " " + fullCommandLine))        
+     elif verbosity == 'basic':
+-        print( G_myName + " -v 1"  + " " + fullCommandLine )
++        print(( G_myName + " -v 1"  + " " + fullCommandLine ))
+     elif verbosity == 'little':
+-        print( G_myName + " -v 20" + " " + fullCommandLine )
++        print(( G_myName + " -v 20" + " " + fullCommandLine ))
+     elif verbosity == 'some':
+-        print( G_myName + " -v 1"  + " --callTrackings monitor-" + " --callTrackings invoke-" + " " + fullCommandLine )
++        print(( G_myName + " -v 1"  + " --callTrackings monitor-" + " --callTrackings invoke-" + " " + fullCommandLine ))
+     elif verbosity == 'full':
+-        print( G_myName + " -v 1"  + " --callTrackings monitor+" + " --callTrackings invoke+" + " " + fullCommandLine )
++        print(( G_myName + " -v 1"  + " --callTrackings monitor+" + " --callTrackings invoke+" + " " + fullCommandLine ))
+     else:
+         return EH_critical_oops('')
+ 
+@@ -4184,7 +4184,7 @@
+     if wrapper:
+         fullCommandLine = wrapper + fullCommandLine
+ 
+-    print fullCommandLine
++    print(fullCommandLine)
+     
+ 
+     
+@@ -4537,10 +4537,10 @@
+                                status=outcome.error,
+                                errInfo=outcome.errInfo,RefactoringTool: Files that were modified:
+RefactoringTool: ./icm/py3/unisos/icm/icm.py
+
+                     ))
+-                    print "------------------"
++                    print("------------------")
+                     G.icmArgsParser.print_help()
+-                    print "------------------"
+-                    print "Run -i usage for more details."
++                    print("------------------")
++                    print("Run -i usage for more details.")
+                 else:
+                     sys.stderr.write(
+                         "{myName}.{cmndName} Failed: Error={status} -- {errInfo}\n".
+@@ -4605,7 +4605,7 @@
+             try:
+                 callDict[eachCmnd] = eval("{eachCmnd}".format(eachCmnd=eachCmnd))
+             except NameError:
+-                print("EH_problem -- Skipping eval({eachCmnd})".format(eachCmnd=eachCmnd))
++                print(("EH_problem -- Skipping eval({eachCmnd})".format(eachCmnd=eachCmnd)))
+                 continue
+ 
+         try:
+@@ -4626,8 +4626,8 @@
+         EH_problem_info("Invalid Action: {invoke}"
+                         .format(invoke=invoke))            
+ 
+-        print("Invalid Action: {invoke}"
+-                        .format(invoke=invoke))
++        print(("Invalid Action: {invoke}"
++                        .format(invoke=invoke)))
+ 
+         outcome = OpOutcome()
+         outcome.error = OpError.CmndLineUsageError
+@@ -4653,7 +4653,7 @@
+         """Part of icm framework."""
+         thisOutcome = OpOutcome()
+         if interactive:
+-            print "python"
++            print("python")
+ 
+         return thisOutcome.set(
+             opError=OpError.Success,
+@@ -4708,7 +4708,7 @@
+ 
+         icmInBase = icmsBase + "/" + G_myName + "/icmIn"
+         
+-        print "{icmInBase}".format(icmInBase=icmInBase)
++        print("{icmInBase}".format(icmInBase=icmInBase))
+             
+         icmParamsToFileParamsUpdate(
+             parRoot="{icmInBase}/paramsFp".format(icmInBase=icmInBase),
+@@ -4759,23 +4759,23 @@
+ 
+         icmParams = G.icmParamDictGet()
+ 
+-        for key, icmParam in icmParams.parDictGet().iteritems():
++        for key, icmParam in icmParams.parDictGet().items():
+             if ( icmParam.argsparseShortOptGet() == None )  and ( icmParam.argsparseLongOptGet() == None ):
+                 break
+ 
+-            print "** " + key
+-            print "*** " + str(icmParam)
++            print("** " + key)
++            print("*** " + str(icmParam))
+ 
+         print("* ICM Common Parameters")            
+ 
+         icmParams = commonIcmParamsPrep()
+ 
+-        for key, icmParam in icmParams.parDictGet().iteritems():
++        for key, icmParam in icmParams.parDictGet().items():
+             if ( icmParam.argsparseShortOptGet() == None )  and ( icmParam.argsparseLongOptGet() == None ):
+                 break
+ 
+-            print "** " + key
+-            print "*** " + str(icmParam)
++            print("** " + key)
++            print("*** " + str(icmParam))
+             
+         print("* ICM Mains Methods")
+             
+@@ -4818,7 +4818,7 @@
+     ):
+         """Version number is obtained from."""
+         if interactive:
+-            print("* ICM-Version: {ver}".format(ver=str( __version__ )))
++            print(("* ICM-Version: {ver}".format(ver=str( __version__ ))))
+             return
+         else:
+             return(format(str(__version__)))
+@@ -5124,7 +5124,7 @@
+         #print mainClasses
+ 
+         relevantClasses = mainClasses
+-        for key, modPath in importedCmnds.iteritems():
++        for key, modPath in importedCmnds.items():
+             if modPath.endswith('.pyc') and os.path.exists(modPath[:-1]):
+                 modPath = modPath[:-1]
+             relevantClasses += ucf.ast_topLevelClassNamesInFile(modPath)
+@@ -5201,7 +5201,7 @@
+             
+         docStr = cmndClass().docStrClass()
+ 
+-        if interactive: print docStr
++        if interactive: print(docStr)
+ 
+         return docStr
+ 
+@@ -5239,7 +5239,7 @@
+ 
+         docStr = cmndClass().cmndDocStr()
+ 
+-        if interactive: print docStr
++        if interactive: print(docStr)
+         return docStr
+ 
+ 
+@@ -5304,7 +5304,7 @@
+         docStr = cmndClass().docStrCmndMethod()
+ 
+         if interactive:
+-            print docStr
++            print(docStr)
+ 
+         return docStr
+ 
+@@ -5333,7 +5333,7 @@
+ 
+         shortDocStr = ucf.STR_getFirstLine(classDocStr)
+         
+-        if interactive: print shortDocStr
++        if interactive: print(shortDocStr)
+         return shortDocStr
+ 
+ """
+@@ -5366,7 +5366,7 @@
+ 
+         longDocStr = classDocStr + "\n" + methodDocStr
+         
+-        if interactive: print longDocStr
++        if interactive: print(longDocStr)
+         return longDocStr
+ 
+ 
+@@ -5439,7 +5439,7 @@
+     absoluteParRoot = os.path.abspath(parRoot)
+ 
+     if not os.path.isdir(absoluteParRoot):
+-        try: os.makedirs( absoluteParRoot, 0775 )
++        try: os.makedirs( absoluteParRoot, 0o775 )
+         except OSError: pass
+ 
+     parValue = "unSet"
