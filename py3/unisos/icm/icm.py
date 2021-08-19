@@ -1218,6 +1218,7 @@ def subProc_bash(
         process = subprocess.Popen(
             cmndStr,
             shell=True,
+            encoding='utf8',
             executable="/bin/bash",            
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
