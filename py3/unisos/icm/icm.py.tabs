@@ -584,11 +584,11 @@ class icmLibOverview(Cmnd):
 *       [[elisp:(org-show-subtree)][|=]]  [[elisp:(org-cycle)][| *Description:* | ]]
 **  [[elisp:(org-cycle)][| ]]  [Xref]          :: *[Related/Xrefs:]*  <<Xref-Here->>  -- External Documents  [[elisp:(org-cycle)][| ]]
 
-**  [[elisp:(org-cycle)][| ]]   Model and Terminology                                      :Overview:
+**  [[elisp:(org-cycle)][| ]]	Model and Terminology 			                   :Overview:
 
 Command line parameters and arguments are passed to Icm.cmnd. ICMs are capable of communicating 
 their full command line parameters and arguments syntax and expectations to ICM Players. 
-                                
+				
 This module's primary documentation is in  http://www.by-star.net/PLPC/180047
 **      [End-Of-Description]
 """

@@ -58,8 +58,6 @@ _CommentEnd_
 # {{{ DBLOCK-nodesList
 nodesList="
 unisos2
-dist
-unisos2.icm.egg-info
 "
 # }}} DBLOCK-nodesList
 ####+END:
