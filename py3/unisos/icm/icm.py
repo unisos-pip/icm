@@ -3458,7 +3458,7 @@ def icmOutputXlsGetPath(fileBaseName):
 """
 
 """
-*  [[elisp:(org-cycle)][| ]]  /G_/                 :: *IcmGlobalContext (G_) -- Class, ICM Singleton, provides global context* [[elisp:(org-cycle)][| ]]
+*  [[elisp:(org-cycle)][| ]]  /G_/                 :: *IcmGlobalContext (G_) -- Class, ICM Singleton Usage, provides global context* [[elisp:(org-cycle)][| ]]
 """
 
 
@@ -3499,7 +3499,7 @@ AuxInvokationContext = ucf.enum(
 """
 
 class IcmGlobalContext():
-     """ Singleton: Interactively Invokable Module Global Context.
+     """ Singleton Usage Model: Interactively Invokable Module Global Context.
      """
 
      icmArgsParser = None
@@ -3510,6 +3510,8 @@ class IcmGlobalContext():
      thisFuncName = None
      logger = None
      astModuleFunctionsList = None
+
+     _icmInfo = {}
      
      usageParams = ucf.Variables
      usageArgs = ucf.Variables
@@ -3587,6 +3589,13 @@ class IcmGlobalContext():
 
      def auxInvokationResults(self):
          return self.__class__._auxInvokationResults
+
+     def icmInfoSet(self, icmInfo):
+         self.__class__._icmInfo = icmInfo
+
+     def icmInfo(self):
+         return self.__class__._icmInfo
+
 
      def cmndNamesSet(self, cmnds):
          self.__class__._cmndNames = cmnds
@@ -5105,12 +5114,15 @@ class cmndList_mainsMethods(Cmnd):
 
     #Do Not Decorate with  @subjectToTracking    
     def cmnd(self,
-            interactive=False,
-            importedCmnds={},
-            mainFileName=None,
+             interactive=False,
+             importedCmnds={},
+             mainFileName=None,
+             importedCmndsFilesList=[],
     ):
         """Is based on subclasses of Cmnd and which are in the main module.
 When interactive is false, return the list and when true print it and return the list.
+
+importedCmndsList was added later with icmMainProxy.
 """
 
         global mainsClassedCmndsGlobal
