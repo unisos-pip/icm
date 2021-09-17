@@ -145,19 +145,6 @@ from bisos.platform import bxPlatformConfig
 
 
 
-####+BEGIN: bx:dblock:python:func :funcName "mainsInfo" :comment "" :funcType "" :retType "none" :deco "" :argsList ""
-"""
-*  [[elisp:(org-cycle)][| ]] [[elisp:(org-show-subtree)][|=]] [[elisp:(show-children 10)][|V]] [[elisp:(bx:orgm:indirectBufOther)][|>]] [[elisp:(bx:orgm:indirectBufMain)][|I]] [[elisp:(blee:ppmm:org-mode-toggle)][|N]] [[elisp:(org-top-overview)][|O]] [[elisp:(progn (org-shifttab) (org-content))][|C]] [[elisp:(delete-other-windows)][|1]]  Func-          :: /mainsInfo/ retType=none argsList=nil  [[elisp:(org-cycle)][| ]]
-"""
-def mainsInfo():
-####+END:
-    """
-** Common examples.
-"""
-    print(__main__.__icmName__)
-
-
-
 ####+BEGIN: bx:icm:python:func :funcName "G_main" :funcType "FrameWrk" :retType "Void" :deco "" :argsList ""
 """
 *  [[elisp:(org-cycle)][| ]]  [[elisp:(org-show-subtree)][|=]] [[elisp:(show-children 10)][|V]] [[elisp:(org-tree-to-indirect-buffer)][|>]] [[elisp:(blee:ppmm:org-mode-toggle)][Nat]] [[elisp:(beginning-of-buffer)][Top]] [[elisp:(delete-other-windows)][(1)]] || Func-FrameWrk  :: /G_main/ retType=Void argsList=nil  [[elisp:(org-cycle)][| ]]
@@ -192,18 +179,19 @@ def classedCmndsDict(importedCmndsModules):
     importedTagsList=[]
     #for moduleName in __main__.g_importedCmndsModules:
     for moduleName in importedCmndsModules:
+        #print(f"moduleName={moduleName}")
         moduleNameList = moduleName.split(".")
         importTag = moduleNameList.pop()
         importModule = ".".join(moduleNameList)
-        # print(f"importTag= {importTag} -- moduleNameList={moduleNameList} -- importModule={importModule}")
+        #print(f"importTag= {importTag} -- moduleNameList={moduleNameList} -- importModule={importModule}")
         _tmp = importlib.import_module(importModule)
         exec(f"{importTag} = _tmp.{importTag}") # assignment is a statement
-        #eval(f"print({importTag}.__file__)") # expression
+        #eval(f"print({importTag}.__file__)") # DEBUG
         eval(f"importedCmndsFilesList.append({importTag}.__file__)") # expression
         importedTagsList.append(importTag)
 
-    # print(importedCmndsFilesList)
-    # print(importedTagsList)
+    #print(importedCmndsFilesList)
+    #print(importedTagsList)
 
     callDict = dict()
     for eachCmnd in icm.cmndList_mainsMethods().cmnd(
@@ -212,22 +200,30 @@ def classedCmndsDict(importedCmndsModules):
             mainFileName=__main__.__file__,
             importedCmndsFilesList=importedCmndsFilesList,
     ):
+        #print(f"eachCmnd={eachCmnd}")
         try:
             callDict[eachCmnd] = eval("__main__.{}".format(eachCmnd))
-            continue
-        except NameError:
+        except AttributeError:
+            #print(f"AttributeError -- __main__.{eachCmnd} -- ignored")
             pass
+        except NameError:
+            #print(f"NameError -- __main__.{eachCmnd} -- ignored")
+            pass
+        else:
+            #print(f"Added __main__.{eachCmnd}")
+            continue
 
         for importTag in importedTagsList:
+            #print(f"trying {importTag}")
             try:
-                print(f"Evaling -- {importTag}.{eachCmnd}")
+                #print(f"Evaling -- {importTag}.{eachCmnd}")
                 eval(f"{importTag}.{eachCmnd}")
             except AttributeError:
-                print(f"AttributeError -- {importTag}.{eachCmnd}")
+                #print(f"AttributeError -- {importTag}.{eachCmnd}")
                 continue
             try:
                 callDict[eachCmnd] = eval(f"{importTag}.{eachCmnd}")
-                print("callDict -- {importTag}.{eachCmnd}")
+                #print("callDict -- {importTag}.{eachCmnd}")
                 break
             except NameError:
                 pass
@@ -236,23 +232,23 @@ def classedCmndsDict(importedCmndsModules):
     return callDict
 
 
-
 G = icm.IcmGlobalContext()
-icmInfo = G.icmInfo()
 
-try:
-   __main__.icmInfo
-except AttributeError:
-    pass
-else:
-    icmInfo.update(__main__.icmInfo)
+# icmInfo = G.icmInfo()
 
-    icmInfo['icmName'] = __main__.__icmName__
-    icmInfo['version'] = __main__.__version__
-    icmInfo['status'] = __main__.__status__
-    icmInfo['credits'] = __main__.__credits__
+# try:
+#    __main__.icmInfo
+# except AttributeError:
+#     pass
+# else:
+#     icmInfo.update(__main__.icmInfo)
 
-    G.icmInfoSet(icmInfo)
+#     icmInfo['icmName'] = __main__.__icmName__
+#     icmInfo['version'] = __main__.__version__
+#     icmInfo['status'] = __main__.__status__
+#     icmInfo['credits'] = __main__.__credits__
+
+#     G.icmInfoSet(icmInfo)
 
 def g_icmMain(
         noCmndEntry=None,
@@ -260,8 +256,11 @@ def g_icmMain(
         importedCmndsModules=[],
         icmPreCmndsHook=None,
         icmPostCmndsHook=None,
+        icmInfo=None,
 ):
     """This ICM's specific information is passed to G_mainWithClass"""
+
+    G.icmInfoSet(icmInfo)
 
     if noCmndEntry:
         examples=noCmndEntry

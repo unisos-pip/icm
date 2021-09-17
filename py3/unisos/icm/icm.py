@@ -4595,6 +4595,7 @@ def invokesProcAllClassed(
     icmRunArgs = G.icmRunArgsGet()
 
     for invoke in icmRunArgs.invokes:
+        #print(f"Looking for {invoke}")
         #
         # First we try cmndList_mainsMethods()
         #
@@ -4604,6 +4605,7 @@ def invokesProcAllClassed(
             #print "TM_"
             pass
         else:
+            #print(f"Found {classedCmnd}")
             outcome = classedCmnd().cmnd(
                 interactive=True, 
             )
@@ -4614,6 +4616,7 @@ def invokesProcAllClassed(
         #
         callDict = dict()
         for eachCmnd in cmndList_libsMethods().cmnd(interactive=False):
+            #print(f"looking at {eachCmnd}")
             try:
                 callDict[eachCmnd] = eval("{eachCmnd}".format(eachCmnd=eachCmnd))
             except NameError:
@@ -5140,6 +5143,11 @@ importedCmndsList was added later with icmMainProxy.
 
         relevantClasses = mainClasses
         for key, modPath in importedCmnds.items():
+            if modPath.endswith('.pyc') and os.path.exists(modPath[:-1]):
+                modPath = modPath[:-1]
+            relevantClasses += ucf.ast_topLevelClassNamesInFile(modPath)
+
+        for modPath in importedCmndsFilesList:
             if modPath.endswith('.pyc') and os.path.exists(modPath[:-1]):
                 modPath = modPath[:-1]
             relevantClasses += ucf.ast_topLevelClassNamesInFile(modPath)
