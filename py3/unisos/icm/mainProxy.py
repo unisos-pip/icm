@@ -98,11 +98,12 @@ icmInfo = {
 """
 ####+END:
 
-import os
-import collections
-import enum
+#import os
+#import collections
+#import enum
 
 import sys
+import types
 
 ####+BEGIN: bx:dblock:global:file-insert :file "/libre/ByStar/InitialTemplates/update/sw/icm/py/importUcfIcmG.py"
 from unisos import ucf
@@ -111,8 +112,8 @@ from unisos import icm
 icm.unusedSuppressForEval(ucf.__file__)  # in case icm and ucf are not used
 
 G = icm.IcmGlobalContext()
-G.icmLibsAppend = __file__
-G.qicmCmndsLibsAppend = __file__
+#G.icmLibsAppend = __file__
+#G.qicmCmndsLibsAppend = __file__
 
 ####+END:
 
@@ -177,7 +178,6 @@ def classedCmndsDict(importedCmndsModules):
     import importlib
     importedCmndsFilesList=[]
     importedTagsList=[]
-    #for moduleName in __main__.g_importedCmndsModules:
     for moduleName in importedCmndsModules:
         #print(f"moduleName={moduleName}")
         moduleNameList = moduleName.split(".")
@@ -251,7 +251,7 @@ G = icm.IcmGlobalContext()
 #     G.icmInfoSet(icmInfo)
 
 def g_icmMain(
-        noCmndEntry=None,
+        noCmndEntry=None,   # To Be Obsoleted
         extraParamsHook=None,
         importedCmndsModules=[],
         icmPreCmndsHook=None,
@@ -262,18 +262,25 @@ def g_icmMain(
 
     G.icmInfoSet(icmInfo)
 
+    examples = None
+    mainEntry = None
+
     if noCmndEntry:
-        examples=noCmndEntry
-        mainEntry=noCmndEntry
+        if type(noCmndEntry) is types.FunctionType:
+            mainEntry = noCmndEntry
+            # examples is None
+        else:  # We then assume it is a Cmnd
+            examples = noCmndEntry
+            mainEntry = noCmndEntry
 
     sys.exit(
         icm.G_mainWithClass(
             inArgv=sys.argv[1:],                 # Mandatory
             #extraArgs=__main__.g_argsExtraSpecify,        # Mandatory
             extraArgs=extraParamsHook,
-            G_examples=noCmndEntry,               # Mandatory
+            G_examples=examples,               # Mandatory
             classedCmndsDict=classedCmndsDict(importedCmndsModules),   # Mandatory
-            mainEntry=noCmndEntry,
+            mainEntry=mainEntry,
             g_icmPreCmnds=icmPreCmndsHook,
             g_icmPostCmnds=icmPostCmndsHook,
         )
