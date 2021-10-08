@@ -541,6 +541,8 @@ import logging
 # Not using import pxssh -- because we need to custom manipulate the prompt
 #import re
 
+import traceback
+
 #import ast
 
 import shlex
@@ -1746,6 +1748,9 @@ def EH_critical_oops(*v, **k):
     print(('EH_: ' + outString + ' -- ' + ucf.stackFrameInfoGet(2) ))
     logger.critical('EH_: ' + outString + ' -- ' + ucf.stackFrameInfoGet(2) )
 
+    traceback.print_stack()
+
+
     #raise RuntimeError()
 
 """
@@ -2104,6 +2109,9 @@ class FILE_TreeObject(object):
             'read: ' + str(self.attrReadGet())
             )
 
+    def fileTreeBaseGet(self):
+        return self.__fileSysPath
+
     @subjectToTracking(fnLoc=True, fnEntry=True, fnExit=True)
     def nodeCreate(self, objectTypes=None, treeProc=None, ignore=None):
         """At the fileSysPath of the FILE_TreeObject, create a node.
@@ -2336,6 +2344,9 @@ class FILE_Param(object):
         #
         # Now we will fill fileParam based on the directory content
         #
+        #if os.path.exists(parNameFullPath):
+            #return EH_problem_usageError(f"Missing Path: {parNameFullPath}")
+
         for item in os.listdir(parNameFullPath):
             if item == "CVS":
                 continue
@@ -2872,7 +2883,7 @@ Usage Pattern:
         outcome = OpOutcome()
 
     for key  in callParamDict:
-        #print key
+        # print(f"111 {key}")
         if not callParamDict[key]:
             if not interactive:
                 return eh_problem_usageError(
@@ -2880,6 +2891,8 @@ Usage Pattern:
                     "Missing Non-Interactive Arg {}".format(key),
                 )
             exec("callParamDict[key] = IcmGlobalContext().usageParams." + key)
+            # print(f"222 {callParamDict[key]}")
+
             
     return True
 
@@ -3037,8 +3050,15 @@ class ICM_Param(object):
          self.__argparseLongOpt =  argparseLongOpt
 
      def __str__(self):
-         return  format(
-             'value: ' + str(self.parValueGet())
+         return  ("""\
+parName: {parName}
+value: {value}
+description: {description}""".
+                  format(
+                      parName=self.parNameGet(),
+                      value=self.parValueGet(),
+                      description=self.parDescriptionGet()
+                  )
              )
 
      def parNameGet(self):
@@ -3258,8 +3278,9 @@ class ICM_ParamDict(object):
                                )
 
          self.parDictAppend(thisParam)
+         # print(f"rrr {thisParam}")
 
-     def parDictAppend(self, icmParam=None):
+     def parDictAppend(self, icmParam):
          """        """
          self.__icmParamDict.update({icmParam.parNameGet():icmParam})
 
@@ -3268,9 +3289,10 @@ class ICM_ParamDict(object):
          """        """
          return self.__icmParamDict
 
-     def parNameFind(self, parName=None):
+     def parNameFind(self, parName):
          """        """
-         return self.__icmParamDict[parName]
+         found = self.__icmParamDict[parName]
+         return found
 
 
      def cmndApplicabilityUpdate(self,
@@ -3558,6 +3580,7 @@ class IcmGlobalContext():
          return self.__class__.icmRunArgsThis
 
      def icmParamDictSet(self, icmParamDict):
+         # print(f"XXX {icmParamDict}")
          self.__class__.icmParamDict = icmParamDict
 
      def icmParamDictGet(self):
