@@ -1206,7 +1206,9 @@ def subProc_bash(
         stdin=None,
         outcome=None,
 ):
-    """subprocess.Popen() -- shell=True, runs cmndStr in bash."""
+    """subprocess.Popen() -- shell=True, runs cmndStr in bash.
+** TODO This should be renamed to subProc_bashOutcome and subProc_bashOut should become subProc_bash.
+    """
     
     #
     if not outcome:
@@ -1237,6 +1239,52 @@ def subProc_bash(
     outcome.error = process.returncode
     
     return outcome
+
+
+"""
+*  [[elisp:(org-cycle)][| ]]  [[elisp:(blee:ppmm:org-mode-toggle)][Nat]] [[elisp:(beginning-of-buffer)][Top]] [[elisp:(delete-other-windows)][(1)]] || Func             ::  subProc_bash  -- subprocess.Popen()  [[elisp:(org-cycle)][| ]]
+"""
+subjectToTracking(fnLoc=True, fnEntry=True, fnExit=True)
+def subProc_bashOut(
+        cmndStr,
+        stdin=None,
+        outcome=None,
+        log=True,
+):
+    """subprocess.Popen() -- shell=True, runs cmndStr in bash."""
+
+    #
+    if not outcome:
+        outcome = OpOutcome()
+
+    if not stdin:
+        stdin = ""
+
+    outcome.stdcmnd = cmndStr
+    try:
+        process = subprocess.Popen(
+            cmndStr,
+            shell=True,
+            encoding='utf8',
+            executable="/bin/bash",
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    except OSError:
+        outcome.error = OSError
+    else:
+        outcome.stdout, outcome.stderr = process.communicate(input=format(stdin.encode()))
+        process.stdin.close()
+
+    process.wait()
+
+    outcome.error = process.returncode
+
+    if log:
+        outcome.log()
+
+    return outcome.stdout.strip()
 
 
 
@@ -2104,10 +2152,16 @@ class FILE_TreeObject(object):
         self.__fileSysPath = fileSysPath
 
     def __str__(self):
-        return  format(
-            'value: ' + str(self.parValueGet()) +
-            'read: ' + str(self.attrReadGet())
+        return  (
+            """value: {value}\nread: {read}""".format(
+                value=self.parValueGet(),
+                read=self.attrReadGet(),
             )
+        )
+        # return  format(
+        #     'value: ' + str(self.parValueGet()) +
+        #     'read: ' + str(self.attrReadGet())
+        #     )
 
     def fileTreeBaseGet(self):
         return self.__fileSysPath
@@ -2840,7 +2894,7 @@ class FP_readTreeAtBaseDir(Cmnd):
 
         blankParDictObj  = FILE_ParamDict()
         thisParamDict = blankParDictObj.readFrom(path=FPsDir)
-        TM_here('path=' + FPsDir)
+        TM_here(f"path={FPsDir}")
 
         if thisParamDict == None:
             return eh_problem_usageError(
@@ -4166,11 +4220,75 @@ def cmndExampleMenuItem(
     else:
         return EH_critical_oops('')
 
+
+
+####+BEGINNOT: bx:icm:py3:func :funcName "icmCmndLine" :funcType "str" :retType "" :deco "default" :argsList ""
+"""
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  Func-str   :: /icmCmndLine/ deco=default  [[elisp:(org-cycle)][| ]]
+"""
+subjectToTracking(fnLoc=True, fnEntry=True, fnExit=True)
+def icmCmndLine(
+####+END:
+        cmndName,    # String
+        cmndPars,    # Dictionary
+        cmndArgs,    # String
+        verbosity='basic',
+        comment='none',
+        icmWrapper=None,
+        icmName=None,
+):
+    """
+** Returns cmndLine as string
+    """
+
+    cmndParsStr = ""
+    for key in cmndPars:
+        cmndParsStr += """--{parName}="{parValue}" """.format(parName=key, parValue=cmndPars[key])
+
+    if not icmName:
+        icmName=G.icmMyName()
+
+    dashV = icmVerbosityTagToDashV(verbosity)
+
+    cmndLine = """{icmName} {dashV} {cmndParsStr} -i {cmndName} {cmndArgs}""".format(
+        icmName=icmName,
+        dashV=dashV,
+        cmndName=cmndName, cmndParsStr=cmndParsStr, cmndArgs=cmndArgs
+    )
+    return cmndLine
+
+####+BEGINNOT: bx:icm:py3:func :funcName "icmVerbosityTagToDashV" :funcType "str" :retType "" :deco "default" :argsList ""
+"""
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  Func-str   :: /icmVerbosityTagToDashV/ deco=default  [[elisp:(org-cycle)][| ]]
+"""
+subjectToTracking(fnLoc=True, fnEntry=True, fnExit=True)
+def icmVerbosityTagToDashV(
+####+END:
+        verbosity,
+) -> str:
+    result = ""
+
+    if verbosity == 'none':
+        result = ""
+    elif verbosity == 'basic':
+        result = " -v 1"
+    elif verbosity == 'little':
+        result = " -v 20"
+    elif verbosity == 'some':
+        result = " -v 1"
+    elif verbosity == 'full':
+        result = " -v 1 --callTrackings monitor+ --callTrackings invoke+"
+    else:
+        return EH_critical_oops('')
+    return result
+
+
+
 """
 *  [[elisp:(org-cycle)][| ]]  [[elisp:(blee:ppmm:org-mode-toggle)][Nat]] [[elisp:(beginning-of-buffer)][Top]] [[elisp:(delete-other-windows)][(1)]] || Func             ::  ex_gCmndMenuItem    [[elisp:(org-cycle)][| ]]
 """    
 @subjectToTracking(fnLoc=True, fnEntry=True, fnExit=True)
-def ex_gCmndMenuItem(
+def ex_gExtCmndMenuItem(
         cmndName,    # String
         cmndPars,    # Dictionary
         cmndArgs,    # String
@@ -4197,6 +4315,40 @@ def ex_gCmndMenuItem(
         icmWrapper=icmWrapper,
         icmName=icmName,
     )    
+
+
+"""
+*  [[elisp:(org-cycle)][| ]]  [[elisp:(blee:ppmm:org-mode-toggle)][Nat]] [[elisp:(beginning-of-buffer)][Top]] [[elisp:(delete-other-windows)][(1)]] || Func             ::  ex_gCmndMenuItem    [[elisp:(org-cycle)][| ]]
+"""
+@subjectToTracking(fnLoc=True, fnEntry=True, fnExit=True)
+def ex_gCmndMenuItem(
+        cmndName,    # String
+        cmndPars,    # Dictionary
+        cmndArgs,    # String
+        verbosity='basic',
+        comment='none',
+        icmWrapper=None,
+        icmName=None,
+):
+    """ vebosity is one of: 'none', 'little', 'some',  'full'
+    """
+
+    cmndParsStr = ""
+    for key in cmndPars:
+        cmndParsStr += """--{parName}="{parValue}" """.format(parName=key, parValue=cmndPars[key])
+
+    cmndLine = """{cmndParsStr} -i {cmndName} {cmndArgs}""".format(
+        cmndName=cmndName, cmndParsStr=cmndParsStr, cmndArgs=cmndArgs
+    )
+
+    cmndExampleMenuItem(
+        commandLine=cmndLine,
+        verbosity=verbosity,
+        comment=comment,
+        icmWrapper=icmWrapper,
+        icmName=icmName,
+    )
+
 
 ####+BEGIN: bx:dblock:python:func :funcName "ex_gExecMenuItem" :funcType "anyOrNone" :retType "bool" :deco "" :argsList "execLine wrapper=None comment='none'"
 """
