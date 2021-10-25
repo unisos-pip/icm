@@ -2151,17 +2151,19 @@ class FILE_TreeObject(object):
         '''Constructor'''
         self.__fileSysPath = fileSysPath
 
-    def __str__(self):
-        return  (
-            """value: {value}\nread: {read}""".format(
-                value=self.parValueGet(),
-                read=self.attrReadGet(),
-            )
-        )
-        # return  format(
-        #     'value: ' + str(self.parValueGet()) +
-        #     'read: ' + str(self.attrReadGet())
-        #     )
+    # MB-2021: parValueGet() is not defined below.
+    #
+    # def __str__(self):
+    #     return  (
+    #         """value: {value}\nread: {read}""".format(
+    #             value=self.parValueGet(),
+    #             read=self.attrReadGet(),
+    #         )
+    #     )
+    #     # return  format(
+    #     #     'value: ' + str(self.parValueGet()) +
+    #     #     'read: ' + str(self.attrReadGet())
+    #     #     )
 
     def fileTreeBaseGet(self):
         return self.__fileSysPath
@@ -4755,7 +4757,11 @@ def G_mainWithClass(
         return outcome.error
     else:
         if mainEntry:
-            mainEntry()
+            import types
+            if type(mainEntry) is types.FunctionType:
+                mainEntry()
+            else:
+                mainEntry().cmnd()
 
     return 0
 
