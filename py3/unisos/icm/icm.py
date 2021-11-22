@@ -698,7 +698,7 @@ class ReturnCode(object):
 OpError = ucf.Constants()
 opErrorDesc = {}
 
-OpError.Success = 0
+OpError.Success = 0  # type: int
 opErrorDesc[OpError.Success] = "Successful Operation -- No Errors"
 OpError.Failure = 1
 opErrorDesc[OpError.Failure] = "Catchall for general errors",

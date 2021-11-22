@@ -119,7 +119,7 @@ G = icm.IcmGlobalContext()
 
 import __main__
 
-from bisos.platform import bxPlatformConfig
+#from bisos.platform import bxPlatformConfig
 #from bisos.platform import bxPlatformThis
 
 #import shutil
