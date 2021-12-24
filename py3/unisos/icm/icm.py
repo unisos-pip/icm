@@ -89,7 +89,8 @@ class Cmnd(object):
                  cmndOutcome = None,  
     ):
         self.cmndLineInputOverRide = cmndLineInputOverRide
-        self.cmndOutcome = cmndOutcome       
+        self.cmndOutcome = cmndOutcome
+        self.obtainDocStr = False
 
     def docStrClass(self,):
         return self.__class__.__doc__
@@ -97,10 +98,17 @@ class Cmnd(object):
     def docStrCmndMethod(self,):
         return self.cmnd.__doc__
 
+    def docStrClassSet(self, docStr):
+        """attribute '__doc__' of 'method' objects is not writable, so we use class."""
+        self.__class__.__doc__ = docStr
+        return self.obtainDocStr
+
+    def obtainDocStrSet(self):
+        self.obtainDocStr = True
+
     def docStrCmndDesc(self,):
         return self.cmnd.cmndDesc.__doc__
 
-    
     def paramsMandatory(self,):
         return self.__class__.cmndParamsMandatory
 
@@ -128,7 +136,9 @@ class Cmnd(object):
     def getOpOutcome(self):
         if self.cmndOutcome:
             return self.cmndOutcome
-        return OpOutcome(invokerName=self.myName())
+        self.cmndOutcome = OpOutcome(invokerName=self.myName())
+        return self.cmndOutcome
+        #return OpOutcome(invokerName=self.myName())
 
     def cmndLineValidate(
             self,
@@ -251,6 +261,7 @@ class Cmnd(object):
             
     def cmnd(self, interactive=False):
         print("This is default Cmnd Class Definition -- It is expected to be overwritten. You should never see this.")
+
 
     def cmndArgsSpec(self):
         # This is default Cmnd Class Definition -- It is expected to be overwritten. You should never see this."
@@ -829,6 +840,8 @@ opResults = opOutcome.results
         else:
             return False
 
+    def exitCode(self):
+        return self.error
 
     def log(self):
         G = IcmGlobalContext()
@@ -858,6 +871,12 @@ def opSuccess():
         OpOutcome()
     )
 
+def opSuccessAnNoResult(cmndOutcome):
+    """."""
+    return cmndOutcome.set(
+        opError=OpError.Success,  # type: ignore
+        opResults=None,
+    )
 
 class OpRemoteCmnd(object):
     """ Remote operation specification and invocation of an CMND through ICM command line.
@@ -5100,6 +5119,12 @@ class cmndInfo(Cmnd):
                 interactive=False,
                 cmndName=cmndName,
         )))
+        outString.append("{baseOrgStr} classDocStrOf={str}\n".format(
+            baseOrgStr=orgIndentStr(1),
+            str=classDocStrOf().cmnd(
+                interactive=False,
+                argsList=[cmndName],
+        )))
         outString.append("{baseOrgStr} cmndParamsMandatory={str}\n".format(
             baseOrgStr=orgIndentStr(1),
             str=cmndClass().paramsMandatory(),           
@@ -5572,6 +5597,50 @@ class cmndDocStrFull(Cmnd):
         
         if interactive: print(longDocStr)
         return longDocStr
+
+
+#
+# NOTYET. Added on 12/16/2021.
+
+####+BEGINNOT: bx:icm:python:cmnd:classHead :cmndName "classDocStrOf" :comment "" :parsMand "" :parsOpt "" :argsMin "1" :argsMax "1" :asFunc "" :interactiveP ""
+"""
+*  _[[elisp:(blee:menu-sel:outline:popupMenu)][±]]_ _[[elisp:(blee:menu-sel:navigation:popupMenu)][Ξ]]_ [[elisp:(bx:orgm:indirectBufOther)][|>]] *[[elisp:(blee:ppmm:org-mode-toggle)][|N]]*  ICM-Cmnd   :: /classDocStrOf/ parsMand= parsOpt= argsMin=1 argsMax=1 asFunc= interactive=  [[elisp:(org-cycle)][| ]]
+"""
+class classDocStrOf(Cmnd):
+    cmndParamsMandatory = [ ]
+    cmndParamsOptional = [ ]
+    cmndArgsLen = {'Min': 1, 'Max': 1,}
+
+    subjectToTracking(fnLoc=True, fnEntry=True, fnExit=True)
+    def cmnd(self,
+        interactive=False,        # Can also be called non-interactively
+        argsList=[],         # or Args-Input
+    ) -> OpOutcome:
+        cmndOutcome = self.getOpOutcome()
+        if interactive:
+            if not self.cmndLineValidate(outcome=cmndOutcome):
+                return cmndOutcome
+            effectiveArgsList = G.icmRunArgsGet().cmndArgs  # type: ignore
+        else:
+            effectiveArgsList = argsList
+
+        callParamsDict = {}
+        if not cmndCallParamsValidate(callParamsDict, interactive, outcome=cmndOutcome):
+            return cmndOutcome
+
+        cmndArgsSpecDict = self.cmndArgsSpec()
+        if not self.cmndArgsValidate(effectiveArgsList, cmndArgsSpecDict, outcome=cmndOutcome):
+            return cmndOutcome
+####+END:
+        if self.docStrClassSet("""\
+** fullUpdate docString is here."""
+                               ): return cmndOutcome
+
+        #thisCmnd = fullUpdate()
+        thisCmnd = eval(f"__main__.{effectiveArgsList[0]}()")
+        thisCmnd.obtainDocStrSet()
+        thisCmnd.cmnd()
+        return f"{thisCmnd.docStrClass()}"
 
 
 """
