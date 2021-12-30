@@ -397,7 +397,51 @@ class Cmnd(object):
                         
         return retVal
 
-        
+    def insAsFPs(self,
+            baseDir,
+    ):
+        """
+** Writes out all inputs of the command as file parameters.
+** Can be invoked from cmnd-line with --insAsFPs=basePath instead of cmnd(). Returns and outcome. Writes
+** cmndParamsMandatory and optionals are walk through in icmRunArgs.
+** Their values are then set in icmParam.
+** All value full icmpParams are then written off as file params.
+        """
+        print(f"{baseDir} HERE Capture")
+        print(IcmGlobalContext().icmParamDictGet())
+
+        G = IcmGlobalContext()
+        icmRunArgs = G.icmRunArgsGet()
+
+        print(f"cmndParamsMandatory={self.cmndParamsMandatory}")
+        print(f"cmndParamsOptional={self.cmndParamsOptional}")
+
+        print(icmRunArgs)
+
+        g_parDict = IcmGlobalContext().icmParamDictGet().parDictGet()
+
+        print(g_parDict)
+
+        icmParam = g_parDict['bpoId']
+
+        icmParam.parValueSet("ZZZZHHHHLLLL")
+
+        for each in icmRunArgs.__dict__:
+            print(each)
+            if icmRunArgs.__dict__[each]:
+                print(f"JJMM --- {each}")
+                print(f"kkjj -- {icmRunArgs.__dict__[each]}")
+
+                # g_param = g_parDict[each]
+
+        for key, icmParam in IcmGlobalContext().icmParamDictGet().parDictGet().items():
+            if ( icmParam.argsparseShortOptGet() == None )  and ( icmParam.argsparseLongOptGet() == None ):
+                break
+            print(f"JJ {key} LL {icmParam}")
+
+
+        outcome = OpOutcome()
+        return outcome
 
 ####+BEGIN: bx:icm:python:func :funcName "cmndArgPositionToMinAndMax" :funcType "anyOrNone" :retType "bool" :deco "" :argsList "argPosStr"
 """
@@ -3877,6 +3921,16 @@ def argsCommonProc(parser):
          )
 
      parser.add_argument(
+         '--insAsFPs',
+         dest='insAsFPs',
+         metavar='ARG',
+         action='store',
+         default='None',
+         help="Emit all inputs as FileParams At Specified Base",
+         )
+
+
+     parser.add_argument(
          '-v',
          '--verbosity',
          dest='verbosityLevel',
@@ -4720,6 +4774,7 @@ def G_mainWithClass(
             
         outcome = invokesProcAllClassed(
             classedCmndsDict,
+            icmRunArgs
         )
 
         if g_icmPostCmnds:
@@ -4780,7 +4835,7 @@ def G_mainWithClass(
             if type(mainEntry) is types.FunctionType:
                 mainEntry()
             else:
-                mainEntry().cmnd()
+                mainEntry().cmnd(icmRunArgs)
 
     return 0
 
@@ -4789,10 +4844,28 @@ def G_mainWithClass(
 """
 def invokesProcAllClassed(
         classedCmndsDict,
+        icmRunArgs,
 ):
     """Process all invokations applicable to all (classed+funced of mains+libs) CMNDs."""
     G = IcmGlobalContext()
     icmRunArgs = G.icmRunArgsGet()
+
+    def applyMethodBasedOnContext(
+            classedCmnd,
+    ):
+        """ Chooses the method to apply Cmnd() to.
+        """
+        insAsFP_baseDir = icmRunArgs.insAsFPs  # This can be a "None" string but not a None
+
+        if insAsFP_baseDir != "None":
+            outcome = classedCmnd().insAsFPs(
+                insAsFP_baseDir,
+            )
+        else:
+            outcome = classedCmnd().cmnd(
+                interactive=True,
+            )
+        return outcome
 
     for invoke in icmRunArgs.invokes:
         #print(f"Looking for {invoke}")
@@ -4806,9 +4879,7 @@ def invokesProcAllClassed(
             pass
         else:
             #print(f"Found {classedCmnd}")
-            outcome = classedCmnd().cmnd(
-                interactive=True, 
-            )
+            outcome = applyMethodBasedOnContext(classedCmnd)
             continue
 
         #
@@ -4820,7 +4891,7 @@ def invokesProcAllClassed(
             try:
                 callDict[eachCmnd] = eval("{eachCmnd}".format(eachCmnd=eachCmnd))
             except NameError:
-                print(("EH_problem -- Skipping eval({eachCmnd})".format(eachCmnd=eachCmnd)))
+                # print(("EH_problem -- Skipping-b eval({eachCmnd})".format(eachCmnd=eachCmnd)))
                 continue
 
         try:
@@ -4828,9 +4899,7 @@ def invokesProcAllClassed(
         except  KeyError:
             pass
         else:
-            outcome =  classedCmnd().cmnd(
-                interactive=True, 
-            )
+            outcome = applyMethodBasedOnContext(classedCmnd)
             continue
 
         #
