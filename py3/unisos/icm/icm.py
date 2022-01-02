@@ -402,46 +402,100 @@ class Cmnd(object):
     ):
         """
 ** Writes out all inputs of the command as file parameters.
-** Can be invoked from cmnd-line with --insAsFPs=basePath instead of cmnd(). Returns and outcome. Writes
-** cmndParamsMandatory and optionals are walk through in icmRunArgs.
+** Can be invoked from cmnd-line with --insAsFPs=basePath instead of cmnd().
+** Returns an outcome.
+** cmndParamsMandatory and optionals are walked through in icmRunArgs.
 ** Their values are then set in icmParam.
 ** All value full icmpParams are then written off as file params.
         """
-        print(f"{baseDir} HERE Capture")
-        print(IcmGlobalContext().icmParamDictGet())
-
         G = IcmGlobalContext()
         icmRunArgs = G.icmRunArgsGet()
 
-        print(f"cmndParamsMandatory={self.cmndParamsMandatory}")
-        print(f"cmndParamsOptional={self.cmndParamsOptional}")
+        # print(f"cmndParamsMandatory={self.cmndParamsMandatory}")
+        # print(f"cmndParamsOptional={self.cmndParamsOptional}")
 
-        print(icmRunArgs)
+        if not pathlib.Path(baseDir).is_dir():
+            print(f"BadUsage: Missing {baseDir}")
+            return
+
+        #print(icmRunArgs)
+
+        applicableIcmParams = ICM_ParamDict()
+
+        def absorbApplicableIcmParam(icmParam, each):
+            # print(f"4444 {each} {icmRunArgs.__dict__[each]}")
+            icmParam.parValueSet(icmRunArgs.__dict__[each])
+            applicableIcmParams.parDictAppend(eachIcmParam)
 
         g_parDict = IcmGlobalContext().icmParamDictGet().parDictGet()
 
-        print(g_parDict)
+        # print(g_parDict)
 
-        icmParam = g_parDict['bpoId']
+        for each in self.cmndParamsMandatory:
+            try:
+                eachIcmParam = g_parDict[each]
+            except  KeyError:
+                print(f"BadUsage: Missing parameter definition: {each}")
+                return
+            else:
+                if not icmRunArgs.__dict__[each]:
+                    print(f"BadUsage: Missing mandatory parameter: {each}")
+                    return
+                absorbApplicableIcmParam(eachIcmParam, each,)
+                # applicableIcmParams.parDictAppend(eachIcmParam)
+                continue
 
-        icmParam.parValueSet("ZZZZHHHHLLLL")
+        for each in self.cmndParamsOptional:
+            try:
+                eachIcmParam = g_parDict[each]
+            except  KeyError:
+                # That is okay. An optionale param was not specified.
+                continue
+            else:
+                absorbApplicableIcmParam(eachIcmParam, each,)
+                continue
 
-        for each in icmRunArgs.__dict__:
-            print(each)
-            if icmRunArgs.__dict__[each]:
-                print(f"JJMM --- {each}")
-                print(f"kkjj -- {icmRunArgs.__dict__[each]}")
+        cmndParamsBase = pathlib.Path(baseDir).joinpath('cmndPars')
+        cmndParamsBase.mkdir(parents=True, exist_ok=True)
 
-                # g_param = g_parDict[each]
+        icmParamsToFileParamsUpdate(
+            parRoot=cmndParamsBase,
+            icmParams=applicableIcmParams,
+        )
 
-        for key, icmParam in IcmGlobalContext().icmParamDictGet().parDictGet().items():
-            if ( icmParam.argsparseShortOptGet() == None )  and ( icmParam.argsparseLongOptGet() == None ):
-                break
-            print(f"JJ {key} LL {icmParam}")
+        FILE_ParamWriteToPath(
+            parNameFullPath=pathlib.Path(baseDir).joinpath('icmName'),
+            parValue=G.icmMyName()
+        )
 
+        FILE_ParamWriteToPath(
+            parNameFullPath=pathlib.Path(baseDir).joinpath('cmndName'),
+            parValue=G.icmRunArgsGet().invokes[0]
+        )
+
+        print(applicableIcmParams)
 
         outcome = OpOutcome()
         return outcome
+
+        # icmParam = g_parDict['bpoId']
+
+        # icmParam.parValueSet("ZZZZHHHHLLLL")
+
+        # for each in icmRunArgs.__dict__:
+        #     print(each)
+        #     if icmRunArgs.__dict__[each]:
+        #         print(f"JJMM --- {each}")
+        #         print(f"kkjj -- {icmRunArgs.__dict__[each]}")
+
+        #         # g_param = g_parDict[each]
+
+        # for key, icmParam in IcmGlobalContext().icmParamDictGet().parDictGet().items():
+        #     if ( icmParam.argsparseShortOptGet() == None )  and ( icmParam.argsparseLongOptGet() == None ):
+        #         break
+        #     print(f"JJ {key} LL {icmParam}")
+
+
 
 ####+BEGIN: bx:icm:python:func :funcName "cmndArgPositionToMinAndMax" :funcType "anyOrNone" :retType "bool" :deco "" :argsList "argPosStr"
 """
@@ -605,6 +659,8 @@ import subprocess
 
 #from unisos.ucf import ucf
 from unisos import ucf
+
+import pathlib
 
 import getpass
 
@@ -1039,6 +1095,9 @@ class Interactivity():
 """
 *  [[elisp:(org-cycle)][| ]]  [[elisp:(blee:ppmm:org-mode-toggle)][Nat]] [[elisp:(beginning-of-buffer)][Top]] [[elisp:(delete-other-windows)][(1)]] || Func             ::  subjectToTracking    [[elisp:(org-cycle)][| ]]
 """
+
+# https://stackoverflow.com/questions/739654/how-to-make-function-decorators-and-chain-them-together
+# https://stackoverflow.com/questions/11731136/class-method-decorator-with-self-arguments
 
 def subjectToTracking(fnLoc=True, fnEntry=True, fnExit=True):
     """[DECORATOR-WITH-ARGS:]  Passes parameters to subSubjectToTracking. See subSubjectToTracking.
@@ -3065,6 +3124,8 @@ def FILE_paramDictReadDeep(interactive=Interactivity.Both,
         if inPathList == None:
             return EH_critical_usageError('inPathList is None and is Non-Interactive')                    
 
+    fileParamsDict = {}
+
     for thisPath in inPathList:
         #absolutePath = os.path.abspath(thisPath)
 
@@ -3084,9 +3145,11 @@ def FILE_paramDictReadDeep(interactive=Interactivity.Both,
                     EH_problem_info("Missing " + root)
                     continue
 
-                print((root + "=" + fileParam.parValueGet()))
+                fileParamsDict.update({root:fileParam.parValueGet()})
+                if interactive:
+                    print((root + "=" + fileParam.parValueGet()))
 
-    return
+    return fileParamsDict
 
 
 """
@@ -4862,6 +4925,10 @@ def invokesProcAllClassed(
                 insAsFP_baseDir,
             )
         else:
+            #
+            # applicableIcmParams = classedCmnd().absorbApplicableIcmParam()
+            # outcome = classedCmnd().cmnd(**applicableIcmParams)
+            #
             outcome = classedCmnd().cmnd(
                 interactive=True,
             )
