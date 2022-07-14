@@ -3095,6 +3095,9 @@ def cmndCallParamsValidate(
 ):
     """Expected to be used in all CMNDs.
 
+MB-2022 --- This is setting the variable not validating it.
+    Perhaps the function should have been cmndCallParamsSet.
+
 Usage Pattern:
 
     if not icm.cmndCallParamValidate(FPsDir, interactive, outcome=cmndOutcome):
@@ -3109,12 +3112,15 @@ Usage Pattern:
     for key  in callParamDict:
         # print(f"111 {key}")
         if not callParamDict[key]:
-            if not interactive:
-                return eh_problem_usageError(
-                    outcome,
-                    "Missing Non-Interactive Arg {}".format(key),
-                )
-            exec("callParamDict[key] = IcmGlobalContext().usageParams." + key)
+            # MB-2022 The logic here seems wrong. When non-interactive, only mandattories
+            # should be verified.
+            # if not interactive:
+            #     return eh_problem_usageError(
+            #         outcome,
+            #         "Missing Non-Interactive Arg {}".format(key),
+            #     )
+            if interactive:
+                exec("callParamDict[key] = IcmGlobalContext().usageParams." + key)
             # print(f"222 {callParamDict[key]}")
 
             
