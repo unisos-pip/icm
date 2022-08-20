@@ -65,6 +65,45 @@ icmInfo = {
 """
 ####+END:
 
+
+####+BEGIN: bx:icm:python:icmItem :itemType "=Imports=" :itemTitle "*IMPORTS*"
+"""
+*  [[elisp:(org-cycle)][| ]]  [[elisp:(org-show-subtree)][|=]] [[elisp:(show-children)][|V]] [[elisp:(org-tree-to-indirect-buffer)][|>]] [[elisp:(blee:ppmm:org-mode-toggle)][Nat]] [[elisp:(beginning-of-buffer)][Top]] [[elisp:(delete-other-windows)][(1)]] || =Imports=      :: *IMPORTS*  [[elisp:(org-cycle)][| ]]
+"""
+####+END:
+
+import typing
+import __main__
+
+import sys
+import os
+import argparse
+import inspect
+from datetime import datetime
+import time
+import logging
+#import pexpect
+# Not using import pxssh -- because we need to custom manipulate the prompt
+#import re
+
+import traceback
+
+#import ast
+
+import shlex
+import subprocess
+
+#from unisos.ucf import ucf
+from unisos import ucf
+
+import pathlib
+
+import getpass
+
+
+
+
+
 ####+BEGIN: bx:dblock:python:class :className "Cmnd" :classType "basic"
 """
 *  [[elisp:(org-cycle)][| ]]  [[elisp:(org-show-subtree)][|=]] [[elisp:(show-children)][|V]] [[elisp:(org-tree-to-indirect-buffer)][|>]] [[elisp:(blee:ppmm:org-mode-toggle)][Nat]] [[elisp:(beginning-of-buffer)][Top]] [[elisp:(delete-other-windows)][(1)]] || Class-basic    :: /Cmnd/ object  [[elisp:(org-cycle)][| ]]
@@ -278,7 +317,8 @@ class Cmnd(object):
             argPosition,
             cmndArgsSpecDict,
             effectiveArgsList,
-    ):
+    ) -> typing.Optional[list]:
+
         def argDefaultGet(
                 cmndArgsSpecDict,
                 argPosition, 
@@ -676,40 +716,6 @@ The "-"/"--invoke" in particular permits rapid module development.
         """
         if interactive: print(description)
         return description
-
-####+BEGIN: bx:icm:python:icmItem :itemType "=Imports=" :itemTitle "*IMPORTS*"
-"""
-*  [[elisp:(org-cycle)][| ]]  [[elisp:(org-show-subtree)][|=]] [[elisp:(show-children)][|V]] [[elisp:(org-tree-to-indirect-buffer)][|>]] [[elisp:(blee:ppmm:org-mode-toggle)][Nat]] [[elisp:(beginning-of-buffer)][Top]] [[elisp:(delete-other-windows)][(1)]] || =Imports=      :: *IMPORTS*  [[elisp:(org-cycle)][| ]]
-"""
-####+END:
-
-import __main__
-
-import sys
-import os
-import argparse
-import inspect
-from datetime import datetime
-import time
-import logging
-#import pexpect
-# Not using import pxssh -- because we need to custom manipulate the prompt
-#import re
-
-import traceback
-
-#import ast
-
-import shlex
-import subprocess
-
-#from unisos.ucf import ucf
-from unisos import ucf
-
-import pathlib
-
-import getpass
-
 
 
 ####+BEGINNOT: bx:dblock:python:icm:cmnd:classHead :modPrefix "lib" :cmndName "icmLibOverview" :parsMand "" :parsOpt "" :argsMin "0" :argsMax "3" :asFunc "" :interactiveP ""
@@ -1693,7 +1699,9 @@ def TM_here(*v, **k):
     else:
         outString = format(*v, **k)
 
-    logger.debug('TM_: ' + outString + ' -- ' + ucf.stackFrameInfoGet(2) )
+    # MB-2022, TM_here can be called before logger is setup.
+    if logger:
+        logger.debug('TM_: ' + outString + ' -- ' + ucf.stackFrameInfoGet(2) )
 
 
 
@@ -2291,8 +2299,10 @@ class FILE_TreeObject(object):
     And is expected to be compatible with lcnObjectTree.libSh.
 
     A FILE_TreeObject is either a
-       - FILE_TreeNode
+       - FILE_TreeNode  # MB-2022, FILE_TreeBranch
        - FILE_TreeLeaf
+
+    # MB-2022 An FTO_Node is either of FTO_Branch of FTO_Leaf
 
     A FILE_TreeObject consists of:
        1) FileSysDir
@@ -3111,6 +3121,11 @@ Usage Pattern:
 
     for key  in callParamDict:
         # print(f"111 {key}")
+        # interactive could be true in two situations:
+        # 1) When a cs is executed on cmnd-line.
+        # 2) When a cs is invoked with interactive as true.
+        # When (2) callParamDict[key] is expcted to be true by having been specified at invokation.
+        #
         if not callParamDict[key]:
             # MB-2022 The logic here seems wrong. When non-interactive, only mandattories
             # should be verified.
@@ -4421,20 +4436,25 @@ def cmndExampleMenuItem(
     if icmWrapper:
         G_myName = icmWrapper + " " + G_myName
 
+    retVal = ""
+
     if verbosity == 'none':
         #print( G_myName + " -v 30" + " " + fullCommandLine)
-        print(( G_myName + " " + fullCommandLine))        
+        retVal = ( G_myName + " " + fullCommandLine)
     elif verbosity == 'basic':
-        print(( G_myName + " -v 1"  + " " + fullCommandLine ))
+        retVal = ( G_myName + " -v 1"  + " " + fullCommandLine )
     elif verbosity == 'little':
-        print(( G_myName + " -v 20" + " " + fullCommandLine ))
+        retVal = ( G_myName + " -v 20" + " " + fullCommandLine )
     elif verbosity == 'some':
-        print(( G_myName + " -v 1"  + " --callTrackings monitor-" + " --callTrackings invoke-" + " " + fullCommandLine ))
+        retVal = ( G_myName + " -v 1"  + " --callTrackings monitor-" + " --callTrackings invoke-" + " " + fullCommandLine )
     elif verbosity == 'full':
-        print(( G_myName + " -v 1"  + " --callTrackings monitor+" + " --callTrackings invoke+" + " " + fullCommandLine ))
+        retVal = ( G_myName + " -v 1"  + " --callTrackings monitor+" + " --callTrackings invoke+" + " " + fullCommandLine )
     else:
         return EH_critical_oops('')
 
+    print(retVal)
+
+    return retVal
 
 
 ####+BEGINNOT: bx:icm:py3:func :funcName "icmCmndLine" :funcType "str" :retType "" :deco "default" :argsList ""
@@ -4556,7 +4576,7 @@ def ex_gCmndMenuItem(
         cmndName=cmndName, cmndParsStr=cmndParsStr, cmndArgs=cmndArgs
     )
 
-    cmndExampleMenuItem(
+    menuCmndLine = cmndExampleMenuItem(
         commandLine=cmndLine,
         verbosity=verbosity,
         comment=comment,
@@ -4564,6 +4584,7 @@ def ex_gCmndMenuItem(
         icmName=icmName,
     )
 
+    return menuCmndLine
 
 ####+BEGIN: bx:dblock:python:func :funcName "ex_gExecMenuItem" :funcType "anyOrNone" :retType "bool" :deco "" :argsList "execLine wrapper=None comment='none'"
 """
